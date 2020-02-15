@@ -1,0 +1,12 @@
+num=10
+
+def prepFiblist(x):
+    fibonacciseq=[]
+    for i in range(num):
+        if i<=1:
+            fibonacciseq.append(1)
+        else:
+            fibonacciseq.append(fibonacciseq[i-1]+fibonacciseq[i-2])
+    return fibonacciseq
+fibonacciseq=filter(lambda x:x%2==0,prepFiblist(num))
+print(sum(fibonacciseq))
