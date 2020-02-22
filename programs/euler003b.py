@@ -1,9 +1,19 @@
-n=600851475143
+N=600851475143
 
-p = 2
-while (p*p <= n):
-  if (n % p == 0):
-    n //= p
-  else:
-    p += 2 if p>2 else 1
-print(n)
+def prime_fact(a):
+    rv = None
+    i = 2
+    while (i <= N):
+        if (a<i):
+            break
+        if a%i==0:
+            rv = i
+            a/=i
+            while a%i==0:
+                a/=i
+        i += 1
+    return rv
+
+print(prime_fact(N))
+
+
