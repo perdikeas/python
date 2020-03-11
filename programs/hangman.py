@@ -41,7 +41,6 @@ words='''ant,baboon,badger,beatle,cat,cobra,coala,caiman,cougar,cayote,deer,dog,
 lion,lizard,llama,mole,monkey,moose,mouse,mule,newt,otter,owl,panda,parrot,python,rabbit,raven,rhino,salmon,shark,snake,spider
 ,tiger,toad,turkey,turkey,weasel,whale,wolf,urangutang,zebra'''.split(',')
 
-#get_current_hanging_stategameover=False
 
 class Color:
     PURPLE = '\033[95m'
@@ -63,15 +62,14 @@ def get_random_word():
     return word
 #state
 
-gameover=None
+
 secret_word=None
 word_found=None
 tries_left=None
 
 
 def initialize_game_state():
-    global gameover, secret_word, word_found, tries_left
-    gameover=False
+    global secret_word, word_found, tries_left
     secret_word=get_random_word()
     print(secret_word)
     word_found='_'*len(secret_word)
@@ -117,27 +115,25 @@ def get_guess():
 
 
 
-def end_game():
-    global gameover
+def end_game_or_start_new():
     print('Do you want to play again, yes or no?')
     b=input()
     if b.startswith('y'):
         initialize_game_state()
-    else:
-        gameover=True
+
 
 
 print('This is Hangman')
 initialize_game_state()
-while gameover==False:
+while (tries_left > 0):
     print_current_hanging_state()
     print_word_found()
     guess = get_guess()
     manage_guess(guess)
     if tries_left==0:
         print('You lost,the secret word was {} '.format(secret_word))
-        end_game()
+        end_game_or_start_new()
 
     if word_found==secret_word:
         print('You won, congratulations! the secret word was \'{}\' - you had {} tries left'.format(secret_word, tries_left))
-        end_game()
+        end_game_or_start_new()
