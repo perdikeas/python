@@ -43,6 +43,20 @@ lion,lizard,llama,mole,monkey,moose,mouse,mule,newt,otter,owl,panda,parrot,pytho
 
 #get_current_hanging_stategameover=False
 
+class Color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+
+
 def get_random_word():
     wordIndex=random.randint(0,len(words)-1)
     word= words[wordIndex]
@@ -83,7 +97,7 @@ def manage_correct_guess():
 def manage_wrong_guess():
     global tries_left
     tries_left-=1
-    print('You fucked up')
+    print(Color.RED+Color.BOLD+Color.UNDERLINE+'You fucked up'+Color.END)
 
 def manage_guess(guess):
     global secret_word
@@ -93,7 +107,7 @@ def manage_guess(guess):
         manage_wrong_guess()
 
 def get_guess():
-    print('Guess a letter (you have {} guesses left)'.format(tries_left))
+    print('Guess a letter (you have {}{}{} guesses left)'.format(Color.CYAN, tries_left, Color.END))
     while (True):
         guess=input()
         if len(guess)!=1 or guess not in 'abcdefghijklmnopqrstuvwxyz':
