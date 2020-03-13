@@ -71,11 +71,12 @@ def handle_wrong_guess(y):
 def print_current_hanging_state():
     print(HANGMAN_PICS[len(HANGMAN_PICS)-1-tries_left])
 
-def end_game_or_not():
+def should_game_continue():
     if str(input('Do u wanna play again,yes or no?')).startswith('y')==True:
         initialize_game()
+        return True
     else:
-        pass
+        return False
 
 
 
@@ -95,13 +96,16 @@ def initialize_game():
 
 initialize_game()
 
-print('This is Hangman,caution: all the secret words are animals')
-
-while tries_left!=0 and word_found!=secret_word:
-    prompt_the_user_to_guess()
-    print_current_hanging_state()
-
+while True:
+    print('This is Hangman,caution: all the secret words are animals')
     print(secret_word)
-    print(word_found)
-    print('You have {} tries left'.format(tries_left))
-end_game_or_not()
+    while tries_left!=0 and word_found!=secret_word:
+        prompt_the_user_to_guess()
+        print_current_hanging_state()
+    
+
+        print(word_found)
+        print('You have {} tries left'.format(tries_left))
+    if (not should_game_continue()):
+        break
+
