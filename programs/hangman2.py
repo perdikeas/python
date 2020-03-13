@@ -83,29 +83,30 @@ def should_game_continue():
 secret_word = None
 tries_left = None
 word_found = None
-
+word_found_displayed_to_user=None
 def initialize_game():
     global secret_word
     global tries_left
     global word_found
+    global word_found_displayed_to_user
     secret_word=get_random_word()
     tries_left=len(HANGMAN_PICS)
     word_found='_'*len(secret_word)
 
 
+def print_word_found_so_far():
+    print(" ".join(list(word_found)))
 
 initialize_game()
-
 while True:
-    print('This is Hangman,caution: all the secret words are animals')
     print(secret_word)
     while tries_left!=0 and word_found!=secret_word:
-        prompt_the_user_to_guess()
+        print("This is Hangman, caution: all the secret words are animals")
+        print("\n\n\t")
         print_current_hanging_state()
-    
-
-        print(word_found)
+        print("\n\n\t")
+        prompt_the_user_to_guess()
+        print_word_found_so_far()
         print('You have {} tries left'.format(tries_left))
     if (not should_game_continue()):
         break
-
