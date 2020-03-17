@@ -47,7 +47,7 @@ def get_random_word():
     return words[word_index]
 
 def prompt_the_user_to_guess():
-    print('Guess a  letter')
+    print('Guess a  letter (you have {} tries left)'.format(tries_left))
     guess=str(input())
 
     if guess in secret_word:
@@ -72,7 +72,8 @@ def print_current_hanging_state():
     print(HANGMAN_PICS[len(HANGMAN_PICS)-1-tries_left])
 
 def should_game_continue():
-    if str(input('Do u wanna play again,yes or no?')).startswith('y')==True:
+    print('\n\n\tThe secret word was {} , better luck next time'.format(secret_word))
+    if str(input('\n\n\tDo u wanna play again,yes or no?')).startswith('y')==True:
         initialize_game()
         return True
     else:
@@ -88,7 +89,6 @@ def initialize_game():
     global secret_word
     global tries_left
     global word_found
-    global word_found_displayed_to_user
     secret_word=get_random_word()
     tries_left=len(HANGMAN_PICS)
     word_found='_'*len(secret_word)
@@ -99,14 +99,14 @@ def print_word_found_so_far():
 
 initialize_game()
 while True:
-    print(secret_word)
     while tries_left!=0 and word_found!=secret_word:
-        print("This is Hangman, caution: all the secret words are animals")
+        print("\tThis is Hangman, caution: all the secret words are animals")
         print("\n\n\t")
         print_current_hanging_state()
         print("\n\n\t")
-        prompt_the_user_to_guess()
         print_word_found_so_far()
-        print('You have {} tries left'.format(tries_left))
-    if (not should_game_continue()):
+        print("\n\n\t")
+        prompt_the_user_to_guess()
+
+    if  (not should_game_continue()):
         break
