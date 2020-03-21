@@ -2,10 +2,6 @@
 board=[None, '1','2','3','4','5','6','7','8','9']
 
 import random
-letters=['X','O']
-player_letter=None
-computer_letter=None
-
 
 class Color:
     PURPLE = '\033[95m'
@@ -18,6 +14,14 @@ class Color:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\033[0m'
+
+
+letters=[Color.CYAN+'X'+Color.END
+,Color.RED+'O'+Color.END]
+player_letter=None
+computer_letter=None
+
+
 
 
 
@@ -61,7 +65,7 @@ def is_winner(bo,letter):
 
 
 def is_space_free(board,space):
-    return (board[space]!='X' and board[space]!='O')
+    return (board[space]!=letters[0] and board[space]!=letters[1])
 
 assign_letters()
 
