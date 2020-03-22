@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 board=[None, '1','2','3','4','5','6','7','8','9']
-
+board_initial_state=board.copy()
 import random
 
 class Color:
@@ -22,6 +22,10 @@ player_letter=None
 computer_letter=None
 
 
+def re_initialize_board():
+    global board
+    board=board_initial_state
+
 
 
 
@@ -31,6 +35,7 @@ def draw_board(board):
     print(board[4]+'|'+board[5]+'|'+board[6])
     print('-+-+-')
     print(board[1]+'|'+board[2]+'|'+board[3])
+
 
 
 def is_odd(a):
@@ -63,11 +68,10 @@ def is_winner(bo,letter):
             (bo[2]==bo[5]==bo[8]==letter) or
             (bo[3]==bo[6]==bo[9]==letter))
 
-
 def is_space_free(board,space):
     return (board[space]!=letters[0] and board[space]!=letters[1])
 
-assign_letters()
+
 
 def make_move(board,letter,move):
     board[move]=letter
@@ -76,18 +80,21 @@ def make_move(board,letter,move):
 
 def is_board_full(board):
     for i in board:
-        if i !=' ':
+        if i!=player_letter and i!=board[0] and i!=computer_letter:
             return False
     return True
+print(is_board_full(board))
 
 def get_player_move():
-
-     print('Make a move(1-9)')
-     choice = int(input())
-     while (not is_space_free(board,choice)):
-         print('Make another move, this space is taken')
-         choice = int(input())
-     return choice
+    if player_letter==letters[0]:
+        print(Color.CYAN+'Make a move(1-9)'+Color.END)
+    else:
+        print(Color.RED + 'Make a move(1-9)'+Color.END)
+    choice = int(input())
+    while (not is_space_free(board,choice)):
+        print('Make another move, this space is taken')
+        choice = int(input())
+    return choice
 
 
 def get_optimal_computer_move(board):
@@ -116,14 +123,23 @@ def get_optimal_computer_move(board):
     for i in range(1,10):
         if is_space_free(board_copy,i):
             return i
-    assert False, "you're not supposed to ever reach this line"
-    +" (function 'is_board_full' should have already"
-    +" checked for this condition)"
+
+
+
 
 
 def ask_to_play_again():
-    return input('Do you want to play again, yes or no ? ').startswith('y')
+    global game_over
+    global board
+    print('Do you want to play again?')
+    if input().startswith('y'):
+        re_initialize_board()
+    else:
+        game_over=True
 
+def draw_dected():
+    print('It was a draw this time, nice one')
+    ask_to_play_again()
 
 game_over=False
 
@@ -132,31 +148,40 @@ turn=get_turn_order(letters)
 draw_board(board)
 while game_over==False:
     if turn==player_letter:
-        print('human turn')
-        print("\n\n")
-        move=get_player_move()
-        print("\n\n")
 
-        make_move(board,player_letter,move)
+        if player_letter==letters[1]:
+            print("\n\n\n")
+            move=get_player_move()
+            make_move(board,player_letter,move)
 
+        else:
+            print("\n\n\n")
+            move=get_player_move()
+            make_move(board,player_letter,move)
+        turn=computer_letter
         if is_winner(board,player_letter):
             print('You beat the computer , congratulations!')
             ask_to_play_again()
+        elif is_board_full(board):
+            draw_dected()
 
-        elif is_board_full(board):
-            ask_to_play_again()
-        else:
-            turn=computer_letter
+
+
     else:
-        print('AI turn')
-        print("\n\n")
-        move=get_optimal_computer_move(board)
-        make_move(board,computer_letter,move)
+
+        if computer_letter==letters[0]:
+            print("\n\n\n")
+            print(Color.CYAN+'AI turn'+Color.END)
+            move=get_optimal_computer_move(board)
+            make_move(board,computer_letter,move)
+        else:
+            print("\n\n\n")
+            print(Color.RED +'AI turn' + Color.END)
+            move=get_optimal_computer_move(board)
+            make_move(board,computer_letter,move)
+        turn=player_letter
         if is_winner(board,computer_letter):
-            print("\n\n")
-            print('The computer has beaten you')
+            print('The AI destroyed you due to superior intellect')
             ask_to_play_again()
         elif is_board_full(board):
-            ask_to_play_again()
-        else:
-            turn=player_letter
+            draw_dected()
