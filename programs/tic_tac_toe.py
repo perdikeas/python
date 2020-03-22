@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-board=[None, '1','2','3','4','5','6','7','8','9']
-board_initial_state=board.copy()
+
 import random
+
+
+board_initial_state=[None, '1','2','3','4','5','6','7','8','9']
+board=None
+
 
 class Color:
     PURPLE = '\033[95m'
@@ -24,10 +28,7 @@ computer_letter=None
 
 def re_initialize_board():
     global board
-    board=board_initial_state
-
-
-
+    board=board_initial_state.copy()
 
 def draw_board(board):
     print(board[7]+'|'+board[8]+'|'+board[9])
@@ -35,7 +36,6 @@ def draw_board(board):
     print(board[4]+'|'+board[5]+'|'+board[6])
     print('-+-+-')
     print(board[1]+'|'+board[2]+'|'+board[3])
-
 
 
 def is_odd(a):
@@ -83,7 +83,7 @@ def is_board_full(board):
         if i!=player_letter and i!=board[0] and i!=computer_letter:
             return False
     return True
-print(is_board_full(board))
+
 
 def get_player_move():
     if player_letter==letters[0]:
@@ -141,47 +141,29 @@ def draw_dected():
     print('It was a draw this time, nice one')
     ask_to_play_again()
 
-game_over=False
+# execution starts here!
 
+game_over=False
+re_initialize_board()
 assign_letters()
 turn=get_turn_order(letters)
 draw_board(board)
 while game_over==False:
     if turn==player_letter:
-
-        if player_letter==letters[1]:
-            print("\n\n\n")
-            move=get_player_move()
-            make_move(board,player_letter,move)
-
-        else:
-            print("\n\n\n")
-            move=get_player_move()
-            make_move(board,player_letter,move)
+        print("\n\n\n")
+        move=get_player_move()
+        make_move(board,player_letter,move)
         turn=computer_letter
-        if is_winner(board,player_letter):
-            print('You beat the computer , congratulations!')
-            ask_to_play_again()
-        elif is_board_full(board):
-            draw_dected()
-
-
-
     else:
-
-        if computer_letter==letters[0]:
-            print("\n\n\n")
-            print(Color.CYAN+'AI turn'+Color.END)
-            move=get_optimal_computer_move(board)
-            make_move(board,computer_letter,move)
-        else:
-            print("\n\n\n")
-            print(Color.RED +'AI turn' + Color.END)
-            move=get_optimal_computer_move(board)
-            make_move(board,computer_letter,move)
+        computer_color = Color.CYAN if computer_letter==letters[0] else Color.RED
+        print("\n\n\n")
+        print(computer_color+'AI turn'+Color.END)
+        move=get_optimal_computer_move(board)
+        make_move(board,computer_letter,move)
         turn=player_letter
-        if is_winner(board,computer_letter):
-            print('The AI destroyed you due to superior intellect')
-            ask_to_play_again()
-        elif is_board_full(board):
-            draw_dected()
+    if is_winner(board,computer_letter) or is_winner(board,player_letter):
+        msg = 'You beat the computer, congratulations!' if  is_winner(board,player_letter) else 'The AI destroyed you due to superior intellect'
+        print(msg)
+        ask_to_play_again()
+    elif is_board_full(board):
+        draw_dected()
