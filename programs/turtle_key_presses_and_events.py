@@ -6,8 +6,9 @@ import time
 colors=['red','black','gold','blue']
 
 tim=turtle.Turtle()
-tim.speed(5)
-tim.width(3)
+tim.speed(0)
+tim.shapesize(5,5,5)
+tim.width(10)
 tim.shape('arrow')
 tim.setpos(0,0)
 
@@ -46,7 +47,7 @@ def click_left_mouse_button(x,y):
     color1=random.choice(colors)
     color2=random.choice(colors)
     tim.color(color1,color2)
-    tim.forward(20)
+    tim.forward(50)
 def click_right_mouse_button(x,y):
     tim.stamp()
 
@@ -61,12 +62,10 @@ time.sleep(6)
 tim.showturtle()
 turtle.clearscreen()
 
+
 turtle.onscreenclick(click_left_mouse_button,1)
 turtle.onscreenclick(click_right_mouse_button,3)
 turtle.ondrag(dragging)
-
-
-
 turtle.onkey(click_x_key,'x')
 turtle.onkey(up,'Up')
 turtle.onkey(down,'Down')
