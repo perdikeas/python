@@ -17,6 +17,9 @@ class Color:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
+#Setting up the Screen
+screen=turtle.Screen()
+screen.bgcolor("black")
 
 #defining functions
 def increase_speed():
@@ -43,38 +46,37 @@ def distance_between(a,b):
 
 
 def print_help_and_get_difficulty():
-    shortCircuit = True
-    if (not shortCircuit):
-        #getting difficulty level
-        screen.bgcolor("white")
-        font=('Courier',13,'bold')
-        turtle.write('You are somewhere in space when aliens approach your spaceship',font=font,align='center')
-        time.sleep(3)
-        turtle.clearscreen()
+    global screen
+    #getting difficulty level
+    screen.bgcolor("white")
+    font=('Courier',13,'bold')
+    turtle.write('You are somewhere in space when aliens approach your spaceship',font=font,align='center')
+    time.sleep(3)
+    turtle.clearscreen()
 
-        turtle.write('Use your spaceship  and the arrow keys to touch them and kill them',font=font,align='center')
-        time.sleep(2)
-        turtle.clearscreen()
+    turtle.write('Use your spaceship  and the arrow keys to touch them and kill them',font=font,align='center')
+    time.sleep(2)
+    turtle.clearscreen()
 
-        turtle.write('You need 10 kills to win if you choose the normal difficulty level',font=font,align='center')
-        time.sleep(2)
-        turtle.clearscreen()
-
-        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-        print(Color.RED+Color.BOLD+'What difficulty level do you want 1 or 2 (2 is the hardest)'+Color.END)
-        screen.bgcolor("black")
-        return int(input())
+    turtle.write('You need 10 kills to win if you choose the normal difficulty level',font=font,align='center')
+    time.sleep(2)
+    turtle.clearscreen()
+    screen.bgcolor('black')
+    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+    print(Color.RED +Color.BOLD +'What difficulty level do you want 1 or 2(2 is the hardest)')
+    if int(input())==1:
+        difficulty=0
     else:
-        return 1
-
+        difficulty=1
+    return difficulty
 
 
 def difficultyLevelToGameConfiguration(difficulty):
     return {
     'alien_number':5 + (difficulty*5)
-    , 'player_health':10 - difficulty
-    , 'necessary_kills':10 + (difficulty*5)
-    , 'alien_speed':2
+    , 'player_health':10 - difficulty*2
+    , 'alien_speed':2 + difficulty *3
+    , 'range':30
     };
 
 
@@ -86,7 +88,7 @@ def generate_aliens(n):
         alien=turtle.Turtle()
         alien.penup()
         alien.shape('circle')
-        alien.color('red')
+        alien.color(random.choice(['red','purple','yellow','pink']))
         alien.shapesize(2,2,2)
         rand1=random.randint(-300,300)
         rand2=random.randint(-270,270)
@@ -127,6 +129,16 @@ def drawBoundary():
     tim.goto(-300,-270)
     tim.hideturtle()
 
+def game_over_or_not():
+    print(Color.CYAN +Color.BOLD +'Do you want to play again, yes or no?')
+    answer=input()
+    if answer.startswith('y'):
+        difficultyLevelToGameConfiguration(print_help_and_get_difficulty)
+        turtle.clearscreen()
+    else:
+        turtle.done()
+
+
 
 def remove_alien(alien):
     global kills
@@ -139,9 +151,6 @@ def remove_alien(alien):
 
 gameConfiguration = difficultyLevelToGameConfiguration(print_help_and_get_difficulty())
 
-#Setting up the Screen
-screen=turtle.Screen()
-screen.bgcolor("black")
 
 #setting spaceship speed
 speed=1
@@ -153,14 +162,13 @@ setKeyBindingsForUserInput()
 drawBoundary()
 
 #main game loop
-while kills!=gameConfiguration['necessary_kills']:
+while aliens:
     global spaceship
     global aliens
     spaceship.forward(speed)
     for alien in aliens:
         alien.forward(gameConfiguration['alien_speed'])
-        if (distance_between(spaceship,alien)<10):
-            print('xx')
+        if (distance_between(spaceship,alien)<gameConfiguration['range']):
             remove_alien(alien)
 
     #Boundary check
@@ -173,36 +181,5 @@ while kills!=gameConfiguration['necessary_kills']:
             alien.left(180)
         elif alien.ycor()>270 or alien.ycor()<-270:
             alien.left(180)
-    time.sleep(0)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-turtle.done()
+game_over_or_not()
