@@ -3,12 +3,16 @@
 import random
 import turtle
 import math
+import time
+
+
 #global variables
 tick=0
 aliens=[]
 missiles=[]
 aliens_escaped=0
 kills=0
+player_health=15
 
 class Color:
     PURPLE = '\033[95m'
@@ -115,7 +119,7 @@ def border_check_x(a):
 
 def border_check_y(a):
     limit=260
-    global aliens,aliens_escaped
+    global aliens,aliens_escaped,player_health
     b=a.clone
     if ((b.ycor()>=limit) and (b.heading()<180 and b.heading()>0)):
         b.setheading(b.heading()*-1)
@@ -123,6 +127,7 @@ def border_check_y(a):
         b.hideturtle()
         aliens.remove(a)
         aliens_escaped+=1
+        player_health-=1
 
 
 def right():
@@ -142,15 +147,28 @@ def add_missile():
 
 
 #main loop
-while aliens_escaped<10 and kills<15:
+while aliens_escaped<10 and kills<10 and player_health!=0:
     #counter
     tick+=1
 
+    print('you now have {} kills'.format(kills))
 #key binding and user input
     turtle.listen()
     turtle.onkey(left,'Left')
     turtle.onkey(right,'Right')
     turtle.onkey(add_missile,'space')
+
+    #collison checking
+    for missile in missiles:
+        for alien in aliens:
+            if distance_between(missile.avatar,alien.clone)<20:
+                alien.clone.health-=1
+                alien.speed-=1
+                missiles.remove(missile)
+                missile.avatar.hideturtle()
+    for alien in aliens:
+        if distance_between(alien.clone,spaceship)<20:
+            player_health-=0.75
 
 
     #thorough boundaries check for all turtles
@@ -183,10 +201,14 @@ while aliens_escaped<10 and kills<15:
         if missile.avatar.ycor()>270:
             missiles.remove(missile)
             missile.avatar.hideturtle()
-    for missile in missiles:
-        for alien in aliens:
-            if distance_between(missile.avatar,alien.clone)<20:
-                alien.clone.health-=1
-                alien.speed-=1
-                missiles.remove(missile)
-                missile.avatar.hideturtle()
+
+turtle.clearscreen()
+screen.bgcolor('white')
+turtle.color('red')
+style=('Courier',15,'bold')
+if kills<=15:
+    turtle.write('Congratulations, you won and killed 10 aliens',font=style,align='center')
+else:
+    spaceship.hideturtle()
+    turtle.write('You fucked up, too many aliens escpaed or damaged your spaceship,',font,align='right')
+turtle.done()
