@@ -15,7 +15,7 @@ pygame.init()
 
 #global variables
 
-bullet_speed = 15
+bullet_speed = 12
 enemies_speed = 3
 
 game_running=True
@@ -78,12 +78,31 @@ char = pygame.image.load('./images/standing.png')
 # setting up a clock in order to set our fps later in the game
 clock=pygame.time.Clock()
 
-#classes and functions
-def sqrt(a):
-    return math.sqrt(a)
 
-def distance_between(a,b):
-    return math.sqrt(math.pow(a.y-b.y,2)+math.pow(a.x-b.x,2))
+def sq(x):
+    return math.pow(x, 2)
+
+class Point():
+    def __init__(self, x, y):
+        self.x=x
+        self.y=y
+
+def distance_between(p1, p2):
+    return math.sqrt(sq(p1.x-p2.x)+sq(p1.y-p2.y))
+
+def diagonal_of_being(being):
+    return math.sqrt(sq(being.width)+sq(being.height))
+
+def collision_between_sprites(man, enemy):
+    center_of_man = Point(man.x+man.width/2, man.y+man.height/2)
+    center_of_enemy = Point(enemy.x+enemy.width/2, man.y+enemy.height/2)
+    d = distance_between(center_of_man, center_of_enemy)
+    return d<=diagonal_of_being(man)/6+diagonal_of_being(enemy)/6+(man.vel+enemy.vel)*0.1
+
+def bullet_hits_target(bullet, enemy):
+    center_of_enemy = Point(enemy.x+enemy.width/2, man.y+enemy.height/2)
+    d = distance_between(bullet, center_of_enemy)
+    return d<=diagonal_of_being(enemy)/4+(bullet.vel+enemy.vel)*0.2
 
 
 
@@ -204,7 +223,7 @@ class Player():
         self.y=y
         self.width=width
         self.height=height
-        self.velocity=4
+        self.vel=4
         self.is_jump=False
         self.jump_count=10
         self.left=False
@@ -269,7 +288,7 @@ def redraw_window():
     text1=font.render('Man health: {}'.format(man.health),1,(0,0,0))
     text2=font.render('Man now has {} kills'.format(man.kills),1,(0,0,0))
 
-    win.blit(text1,(330,50))
+    win.blit(text1,(300,50))
     win.blit(text2,(40,50))
 
     for bullet in bullets:
@@ -282,7 +301,6 @@ def redraw_window():
 
 #we begin by adding only one opponent
 enemies.append(Enemy(400,400,64,64))
-
 
 
 while game_running:
@@ -307,8 +325,8 @@ while game_running:
     #enemy movement
     for enemy in enemies:
         enemy.live(win)
-        if distance_between(enemy,man)<10:
-            man.health-=0.5
+        if collision_between_sprites(man, enemy):
+            man.health-=0.2
 
     for event in pygame.event.get():
 
@@ -323,7 +341,12 @@ while game_running:
         else:
             bullets.remove(bullet)
         for enemy in enemies:
-            if distance_between(bullet,enemy)<enemy.width:
+            d = distance_between(bullet,enemy)
+#            if d<d_min:
+ #               d_min = d
+  #              print('minimum distance so far is: {}'.format(d_min))
+#            if d <  ((abs(bullet.vel)+abs(enemy.vel))/2 + 32)*1.1:
+            if bullet_hits_target(bullet, enemy):
                 bullets.remove(bullet)
                 enemy.health-=1
 
@@ -350,15 +373,15 @@ while game_running:
         man.left=True
         man.right=False
         man.standing=False
-        if man.x>man.velocity:
-            man.x-=man.velocity
+        if man.x>man.vel:
+            man.x-=man.vel
 
     elif keys[pygame.K_RIGHT]:
         man.standing=False
         man.right=True
         man.left=False
-        if man.x<Screenwidth-man.width-man.velocity:
-            man.x+=man.velocity
+        if man.x<Screenwidth-man.width-man.vel:
+            man.x+=man.vel
     else:
         man.walk_count=0
         man.standing=True
