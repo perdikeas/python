@@ -15,6 +15,8 @@ pygame.init()
 
 #global variables
 
+bullet_speed = 15
+enemies_speed = 3
 
 game_running=True
 Screenwidth=500
@@ -143,7 +145,7 @@ class Enemy():
         self.width=width
         self.height=height
         self.walk_count=0
-        self.vel=3
+        self.vel=enemies_speed
         self.health=20
         self.starting_health=20
         self.visible=True
@@ -242,12 +244,13 @@ class Player():
 
 class Projectile():
     def __init__(self,x,y,radius,color,facing):
+        global bullet_speed
         self.x=x
         self.y=y
         self.radius=radius
         self.color=color
         self.facing=facing
-        self.vel=15*facing
+        self.vel=bullet_speed*facing
 
     def draw(self,win):
         pygame.draw.circle(win,self.color,(self.x,self.y),self.radius)
