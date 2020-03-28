@@ -1,51 +1,52 @@
 #!/usr/bin/env python3
 
+
+########################
+# OS API (Application Programming Interface)
+
+def os_malloc(n):
+    return [None for i in range(n)]
+        
+
+########################
+# library implementation
+
+
 class Stack():
-    def __init__(self, N):
-        self.N=N
-        self.container=['not a value' for i in range(self.N)]
-        self.slotForNextInsert = 0
-    def isFull(self):
-        return self.slotForNextInsert==self.N
-    def isEmpty(self):
-        return self.slotForNextInsert==0
-    def push(self, v):
-        if self.isFull():
-            raise Exception('stack overflow')
-#        if self.slotForNextInsert>=self.N:
- #           self.container+=[None for i in range(self.N)]
-        self.container[self.slotForNextInsert] = v
-        self.slotForNextInsert += 1
-    def peek(self):
-        if self.isEmpty():
-            raise Exception('stack is empty')
-        else:
-            return self.container[self.slotForNextInsert-1]
+
+    def __init__(self, initial_len):
+        self.list=os_malloc(initial_len)
+        self.current_index=0
+
+    def push(self,value):
+        if self.current_index==len(self.list):
+            new_list = os_malloc(2*len(self.list))
+            print('copying {} elements'.format(len(self.list)))
+            for i in range(len(self.list)):
+                new_list[i]=self.list[i]
+            self.list = new_list
+
+        assert self.current_index < len(self.list)
+        self.list[self.current_index]=value
+        print('wrote value {} in array pos {}'.format(value, self.current_index))
+        self.current_index+=1
+
     def pop(self):
-        if self.isEmpty():
+
+        if self.current_index==0:
             raise Exception('stack is empty')
         else:
-            valueToReturn = self.container[self.slotForNextInsert-1]
-            self.slotForNextInsert-=1
-            return valueToReturn
+            index_to_pop=self.current_index-1
+            self.current_index-=1
+            return self.list[index_to_pop]
 
-s1 = Stack(10)
+########################
+# client coder
 
-i = 0
-while not s1.isFull():
-    s1.push(i)
-    i += 1
+stack=Stack(10)
+for i in ['v{}'.format(i) for i in range(20)]:
+    stack.push(i)
 
-while not s1.isEmpty():
-    print ( s1.pop())
-
-
-if False:
-    initial_len=10
-    stack1=Stack(initial_len)
-    i=0
-    for i in range(50):
-        stack1.push(i)
-    for i in range(3):
-        stack1.pop()
-    print(stack1)
+for i in range(20):
+    print(stack.pop())
+    
