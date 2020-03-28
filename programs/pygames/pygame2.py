@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 
 
 
@@ -16,7 +16,7 @@ pygame.init()
 #global variables
 
 bullet_speed = 12
-enemies_speed = 3
+enemies_speed = 4
 
 game_running=True
 Screenwidth=500
@@ -380,7 +380,9 @@ while game_running:
             facing=1
         if len(bullets)<1:
             bullets.append(Projectile(round(man.x+man.width//2),round(man.y+man.height//2),6,(0,0,0),facing))
-            
+            bullet_sound.play()
+            if man.health<man.starting_health-5:
+                man.health+=5
 
 
 
