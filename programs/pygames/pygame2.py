@@ -78,32 +78,11 @@ char = pygame.image.load('./images/standing.png')
 # setting up a clock in order to set our fps later in the game
 clock=pygame.time.Clock()
 
+#setting up the bullet and background sound effect
 
-def sq(x):
-    return math.pow(x, 2)
-
-class Point():
-    def __init__(self, x, y):
-        self.x=x
-        self.y=y
-
-def distance_between(p1, p2):
-    return math.sqrt(sq(p1.x-p2.x)+sq(p1.y-p2.y))
-
-def diagonal_of_being(being):
-    return math.sqrt(sq(being.width)+sq(being.height))
-
-def collision_between_sprites(man, enemy):
-    center_of_man = Point(man.x+man.width/2, man.y+man.height/2)
-    center_of_enemy = Point(enemy.x+enemy.width/2, man.y+enemy.height/2)
-    d = distance_between(center_of_man, center_of_enemy)
-    return d<=diagonal_of_being(man)/6+diagonal_of_being(enemy)/6+(man.vel+enemy.vel)*0.1
-
-def bullet_hits_target(bullet, enemy):
-    center_of_enemy = Point(enemy.x+enemy.width/2, man.y+enemy.height/2)
-    d = distance_between(bullet, center_of_enemy)
-    return d<=diagonal_of_being(enemy)/4+(bullet.vel+enemy.vel)*0.2
-
+music=pygame.mixer.music.load('./images/music.mp3')
+pygame.mixer.music.play(-1)
+bullet_sound=pygame.mixer.Sound('./images/shotgun.ogg')
 
 
 
@@ -111,27 +90,41 @@ def bullet_hits_target(bullet, enemy):
 def player_health_checking(player):
     global enemies,game_running,win,font
 
-    necessary_kills=1
+    necessary_kills=5
 
 
     if player.kills<necessary_kills:
+
+        pygame.draw.rect(win,(255,255,255),(player.x+11,player.y-20,50,10))
+
         if player.health<=player.starting_health and player.health>=player.starting_health-5:
-            pygame.draw.rect(win,color1,(player.x,player.y-20,55+player.health-player.starting_health,10))
+            pygame.draw.rect(win,color1,(player.x+11,player.y-20,50-round(2.5*(20-player.health)),10))
+
         elif player.health<player.starting_health-5 and player.health>=player.starting_health-15:
-            pygame.draw.rect(win,color2,(player.x,player.y-20,55+player.health-player.starting_health,10))
+            pygame.draw.rect(win,color2,(player.x+11,player.y-20,50-round(2.5*(20-player.health)),10))
+
         elif player.health<player.starting_health-15 and player.health>0:
-            pygame.draw.rect(win,color3,(player.x,player.y-20,55+player.health-player.starting_health,10))
+            pygame.draw.rect(win,color3,(player.x+11,player.y-20,50-round(2.5*(20-player.health)),10))
+
         else:
             player.visible=False
+
             game_running=False
+
             for enemy in enemies:
                 enemy.visible=False
+
             win.fill((255,255,255))
             text3=font.render('The goblins killed you',1,(0,0,0))
+
             win.blit(text3,(150,250))
+
             pygame.display.update()
+
             time.sleep(4)
+
             pygame.quit()
+
     else:
         player.visible=False
         game_running=False
@@ -141,12 +134,14 @@ def player_health_checking(player):
 
         win.fill((255,255,255))
 
-        text4=font.render('You slayed 10 goblins',1,(0,0,0))
+        text4=font.render('You slayed {} goblins'.format(necessary_kills),1,(0,0,0))
 
         win.blit(text4,(150,250))
 
         pygame.display.update()
+
         time.sleep(4)
+
         pygame.quit()
 
 
@@ -158,7 +153,7 @@ class Enemy():
     enemy_walk_right=[pygame.image.load(fname) for fname in enemy_walk_right_files]
     enemy_walk_left=[pygame.image.load(fname) for fname in enemy_walk_left_files]
 
-    def __init__(self,x,y,width,height):
+    def __init__(self,x,y,width,height,facing):
         self.x=x
         self.y=y
         self.width=width
@@ -168,15 +163,18 @@ class Enemy():
         self.health=20
         self.starting_health=20
         self.visible=True
+        self.hitbox=(self.x+17,self.y+2,31,57)
+        self.facing=1
+
     def live(self,win):
         global enemies,man
-
+        pygame.draw.rect(win,(255,255,255),(self.x+11,self.y-20,50,10))
         if self.health<=20 and self.health>15:
-            pygame.draw.rect(win,color1,(self.x,self.y-20,55+self.health-self.starting_health,10))
+            pygame.draw.rect(win,color1,(self.x+11,self.y-20,50-round(2.5*(20-self.health)),10))
         elif self.health<=15 and self.health>5:
-            pygame.draw.rect(win,color2,(self.x,self.y-20,55+self.health-self.starting_health,10))
+            pygame.draw.rect(win,color2,(self.x+11,self.y-20,50-round(2.5*(20-self.health)),10))
         elif self.health<=5 and self.health>0:
-            pygame.draw.rect(win,color3,(self.x,self.y-20,55+self.health-self.starting_health,10))
+            pygame.draw.rect(win,color3,(self.x+11,self.y-20,50-round(2.5*(20-self.health)),10))
         else:
             man.kills+=1
             self.visible=False
@@ -188,32 +186,32 @@ class Enemy():
 
         self.move(win)
 
-        if self.vel>0:
+        if self.facing>0:
             win.blit(self.enemy_walk_right[self.walk_count//3],(self.x,self.y))
             self.walk_count+=1
         else:
             win.blit(self.enemy_walk_left[self.walk_count//3],(self.x,self.y))
             self.walk_count+=1
 
+        self.hitbox=(self.x+17,self.y+2,31,57)
 
         pygame.display.update()
 
+
     def move(self,win):
 
-        if self.vel>0:
-            self.x+=self.vel
 
-            if self.x+self.vel+self.width>Screenwidth:
-                self.vel*=-1
-                self.walk_count=0
+        self.x+=self.vel*self.facing
 
+        if self.x+self.vel*self.facing+self.width>Screenwidth:
+            self.facing*=-1
+            self.walk_count=0
 
-        else:
-            self.x+=self.vel
+        if self.x<self.vel:
+            self.facing*=-1
 
-            if self.x<self.vel:
-                self.vel*=-1
-
+    def is_touching_bullet(self):
+        self.health-=2
 
 
 #player class
@@ -234,30 +232,40 @@ class Player():
         self.starting_health=20
         self.visible=True
         self.kills=0
+        self.hitbox=(self.x+17,self.y+11,29,52)
 
 
     def draw(self):
         if self.visible:
+
             if not(self.standing):
                 if self.left:
                     win.blit(walkLeft[self.walk_count//3],(self.x,self.y))
                     self.walk_count+=1
+
                 elif self.right:
                     win.blit(walkRight[self.walk_count//3],(self.x,self.y))
                     self.walk_count+=1
+
             else:
                 if self.right:
                     win.blit(walkRight[0],(self.x,self.y))
                     self.walk_count+=1
+
                 else:
                     win.blit(walkLeft[0],(self.x,self.y))
                     self.walk_count+=1
 
             if self.walk_count+1>=27:
                 self.walk_count=0
+            self.hitbox=(self.x+17,self.y+11,29,52)
 
-        pygame.display.update()
 
+    def hit(self):
+        self.health-=0.2
+
+
+    pygame.display.update()
 
 #creating projectile/bullet class
 
@@ -270,6 +278,7 @@ class Projectile():
         self.color=color
         self.facing=facing
         self.vel=bullet_speed*facing
+
 
     def draw(self,win):
         pygame.draw.circle(win,self.color,(self.x,self.y),self.radius)
@@ -300,7 +309,7 @@ def redraw_window():
 
 
 #we begin by adding only one opponent
-enemies.append(Enemy(400,400,64,64))
+enemies.append(Enemy(400,400,64,64,random.choice([-1,1])))
 
 
 while game_running:
@@ -313,20 +322,27 @@ while game_running:
     #drawing functions
     redraw_window()
 
+
+
     player_health_checking(man)
-    #adding new enemies if there are none on the screen
+
+
+
     counter+=1
 
     #always have enemies on the screen
     if  len(enemies)<1:
-        enemies.append(Enemy(random.randint(50,400),400,64,64))
+        enemies.append(Enemy(random.randint(20,400),400,64,64,random.choice([-1,1])))
+
 
 
     #enemy movement
     for enemy in enemies:
         enemy.live(win)
-        if collision_between_sprites(man, enemy):
-            man.health-=0.2
+        if man.hitbox[1]<enemy.hitbox[1]+enemy.hitbox[3] and man.hitbox[1]+ man.hitbox[3]>enemy.hitbox[1]:
+            if man.hitbox[0]<enemy.hitbox[0]+enemy.hitbox[2] and man.hitbox[0] + man.hitbox[2]>enemy.hitbox[0]:
+                man.hit()
+
 
     for event in pygame.event.get():
 
@@ -336,19 +352,18 @@ while game_running:
 
     #bullet movement
     for bullet in bullets:
+        for enemy in enemies:
+            if bullet.y-bullet.radius>=enemy.hitbox[1] and bullet.y+bullet.radius<enemy.hitbox[1]+enemy.hitbox[3]:
+                if bullet.x+bullet.radius>=enemy.hitbox[0] and bullet.x-bullet.radius<enemy.hitbox[0]+enemy.hitbox[2]:
+                    bullets.remove(bullet)
+                    enemy.is_touching_bullet()
+
+
+
         if bullet.x<Screenwidth-bullet.vel and bullet.x>bullet.vel:
             bullet.x+=bullet.vel
         else:
             bullets.remove(bullet)
-        for enemy in enemies:
-            d = distance_between(bullet,enemy)
-#            if d<d_min:
- #               d_min = d
-  #              print('minimum distance so far is: {}'.format(d_min))
-#            if d <  ((abs(bullet.vel)+abs(enemy.vel))/2 + 32)*1.1:
-            if bullet_hits_target(bullet, enemy):
-                bullets.remove(bullet)
-                enemy.health-=1
 
 
 
@@ -363,9 +378,9 @@ while game_running:
             facing=-1
         else:
             facing=1
-        if len(bullets)<3:
+        if len(bullets)<1:
             bullets.append(Projectile(round(man.x+man.width//2),round(man.y+man.height//2),6,(0,0,0),facing))
-
+            
 
 
 
