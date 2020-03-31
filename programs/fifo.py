@@ -14,13 +14,18 @@ class Queue():
 
     def is_empty(self):
         return self.front==self.back
+
     def is_full(self):
         return self.back-self.front == len(self.list)
 
 
     def push(self,value):
         if self.is_full():
-            raise Exception('queue is full')
+            new_list=os_malloc(2*len(self.list))
+            for x in range(len(self.list)):
+                new_list[x]=self.list[x]
+            self.list=new_list
+
         self.list[self.back % len(self.list)]=value
         self.back += 1
 
@@ -31,12 +36,10 @@ class Queue():
         self.front += 1
         return rv
 
+
 # client programmer
-q  = Queue(10)
-for k in range(5):
-    for i in range(10):
-        q.push('value-{}'.format(i))
-    for i in range(10):
-        print(q.pop())
-    print(q.is_full())
-    print(q.is_empty())
+q=Queue(1)
+for i in range(10):
+    q.push(i**2)
+for i in range(4):
+    print(q.pop())
