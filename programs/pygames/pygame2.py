@@ -134,7 +134,7 @@ def player_health_checking(player):
 
         win.fill((255,255,255))
 
-        text4=font.render('You slayed {} goblins'.format(necessary_kills),1,(0,0,0))
+        text4=font.render('You slayed {} goblins !'.format(necessary_kills),1,(0,0,0))
 
         win.blit(text4,(150,250))
 
@@ -179,6 +179,8 @@ class Enemy():
             man.kills+=1
             self.visible=False
             enemies.remove(self)
+            if man.health<=man.starting_health-5:
+                man.health+=5
 
 
         if self.walk_count+1 >= 33:
@@ -332,7 +334,7 @@ while game_running:
 
     #always have enemies on the screen
     if  len(enemies)<1:
-        enemies.append(Enemy(random.randint(20,400),400,64,64,random.choice([-1,1])))
+        enemies.append(Enemy(10,400,64,64,random.choice([-1,1])))
 
 
 
@@ -381,8 +383,7 @@ while game_running:
         if len(bullets)<1:
             bullets.append(Projectile(round(man.x+man.width//2),round(man.y+man.height//2),6,(0,0,0),facing))
             bullet_sound.play()
-            if man.health<man.starting_health-5:
-                man.health+=5
+
 
 
 
