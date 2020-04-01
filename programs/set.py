@@ -2,7 +2,7 @@
 class Set():
     def __init__(self):
         self.buffer=list()
-        self._ix = 0
+        self._ix=0
 
     def print(self):
         print(self.buffer)
@@ -11,7 +11,7 @@ class Set():
         return len(self.buffer)
 
     def contains(self,element):
-        for value in self.buffer:
+        for value in self:
             if value==element:
                 return True
         return False
@@ -37,26 +37,32 @@ class Set():
 
         return True
 
-    def union(self,setb):
+    def union(self, setb):
         setc=Set()
 
         setc.buffer.extend(self.buffer)
 
-        for value in setb.buffer:
+        for value in setb:
             if not self.contains(value):
                 setc.add(value)
 
         return setc
 
+    def cartesian_join(self, setb):
+        setc=Set()
+        for value in self:
+            for element in setb:
+                setc.add((value,element))
+        return setc
 
     def intersect(self,setb):
         setc=Set()
 
-        for value in self.buffer:
+        for value in self:
             if  setb.contains(value):
                 setc.add(value)
 
-        for value in setb.buffer:
+        for value in setb:
             if  self.contains(value):
                 setc.add(value)
 
@@ -77,25 +83,38 @@ class Set():
             self._ix += 1
             return v
         else:
+            self._ix = 0
             raise StopIteration
 
+if (False):
+    a=Set()
+    a.add(2)
+    a.remove(2)
+    a.add(3)
+    for i in range(1,10):
+        a.add(i)
+        b=Set()
+    for i in range(1,10):
+        b.add(i**2)
+        #c=a.union(b)
+    d=a.cartesian_join(b)
+    a.print()
+    b.print()
+    #c.print()
+    d.print()
 
-a=Set()
-a.add(2)
-a.remove(2)
-a.add(3)
-for i in range(1,10):
+a = Set()
+for i in range(5):
     a.add(i)
-b=Set()
-for i in range(1,10):
-    b.add(i**2)
-c=a.union(b)
 
-a.print()
-b.print()
+b = Set()
+for i in range(5):
+    b.add(i)
+
+c = a.cartesian_join(b)
 c.print()
-a_as_list = list(a)
-print(a_as_list)
+    
+
 
 class Person():
     def __init__(self):
@@ -106,7 +125,8 @@ class Person():
         yield self.age
 
 
-
 p = Person()
-pl = list(p)
-print (pl)
+for i in range(10):
+    pl = list(p)
+    print (pl)
+
