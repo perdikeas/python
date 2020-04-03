@@ -37,7 +37,7 @@ class Set():
 
         return True
 
-    def union(self, setb):
+    def union(self,setb):
         setc=Set()
 
         setc.buffer.extend(self.buffer)
@@ -48,11 +48,14 @@ class Set():
 
         return setc
 
-    def cartesian_join(self, setb):
+    def cartesian_joint(self,setb):
         setc=Set()
+
         for value in self:
             for element in setb:
+
                 setc.add((value,element))
+
         return setc
 
     def intersect(self,setb):
@@ -79,41 +82,31 @@ class Set():
         return self
     def __next__(self):
         if self._ix < len(self.buffer):
+            #print ("{}".format(self._ix))
             v = self.buffer[self._ix]
             self._ix += 1
             return v
         else:
-            self._ix = 0
+            self._ix=0
             raise StopIteration
 
-if (False):
-    a=Set()
-    a.add(2)
-    a.remove(2)
-    a.add(3)
-    for i in range(1,10):
-        a.add(i)
-        b=Set()
-    for i in range(1,10):
-        b.add(i**2)
-        #c=a.union(b)
-    d=a.cartesian_join(b)
-    a.print()
-    b.print()
-    #c.print()
-    d.print()
 
-a = Set()
-for i in range(5):
+a=Set()
+a.add(2)
+a.remove(2)
+a.add(3)
+for i in range(1,10):
     a.add(i)
+b=Set()
+for i in range(1,10):
+    b.add(i**2)
+c=a.union(b)
+d=a.cartesian_joint(b)
 
-b = Set()
-for i in range(5):
-    b.add(i)
-
-c = a.cartesian_join(b)
+a.print()
+b.print()
 c.print()
-    
+d.print()
 
 
 class Person():
@@ -125,8 +118,7 @@ class Person():
         yield self.age
 
 
-p = Person()
-for i in range(10):
-    pl = list(p)
-    print (pl)
 
+p = Person()
+pl = list(p)
+print (pl)
