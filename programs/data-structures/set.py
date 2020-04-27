@@ -29,7 +29,6 @@ class Set():
         return self.is_subset_of(setb) and setb.is_subset_of(self)
 
     def is_subset_of(self,setb):
-        setb=Set()
 
         for value in self:
             if not setb.contains(value):

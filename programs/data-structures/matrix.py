@@ -3,6 +3,20 @@
 #two dimensional array implementation or matrix in linear algebra
 import random
 
+
+class Color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+
 class Matrix():
     def __init__(self, nrows, ncols):
         self.buffer=list()
@@ -48,15 +62,41 @@ class Matrix():
         return rv
 
 
+    def gaus_elim_algorithm(self):
+        pass
+
+
+    def reduced_matrix(self,i,j):
+        self.buffer.pop(i-1)
+        for row in range(self.nrows):
+            self.buffer[row].pop(j-1)
+
+    def find_determinant(self):
+        if self.nrows==2 and self.ncols==2:
+            rv=self.get(1,1)*self.get(2,2)-self.get(1,2)*self.get(2,1)
+        else:
+            rv=0
+            i=random.randint(1,self.nrows+1)
+            for j in range(1,self.ncols+1):
+                rv+=self.get(i,j)*find_determinant(self.reduced_matrix,i,j)
+        return rv
+
+
+    def swap_rows(self,row1,row2):
+        row_to_swap=self.buffer[row1-1]
+        self.buffer[row1-1]=self.buffer[row2-1]
+        self.buffer[row2-1]=row_to_swap
+
+
+    def multiply_row_by_scalar(self,row,scalar):
+        for index in range(len(self.buffer[row-1])):
+            self.set(row,index,self.get(row,index)*scalar)
+
+    def add_rows(self,row1,row2,scalar):
+        for index in range(1,self.ncols+1):
+            self.set(row1,index,self.get(row1,index)+self.get(row2,index)*scalar)
+
+
     def _print(self):
         for i in range(self.nrows):
             print("{}\n".format(self.buffer[i]))
-
-matrix1=Matrix(2,2)
-for i in range(matrix1.nrows):
-    for j in range(matrix1.ncols):
-        matrix1.set(i,j,random.randint(10,20))
-
-matrix1._print()
-matrix1.scalar_mul(2)
-matrix1._print()
