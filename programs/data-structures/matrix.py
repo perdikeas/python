@@ -3,6 +3,13 @@
 #two dimensional array implementation or matrix in linear algebra
 import random
 
+# utility functions
+def mul_list(scalar, alist):
+    return [scalar*v for v in alist]
+
+def add_lists(alist, blist):
+    assert len(alist)==len(blist)
+    return [alist[i]+blist[i] for i in range(len(alist))]
 
 class Color:
     PURPLE = '\033[95m'
@@ -19,7 +26,6 @@ class Color:
 
 class Matrix():
     def __init__(self, nrows, ncols):
-        self.buffer=list()
         self.nrows = nrows
         self.ncols = ncols
         self.buffer = [ [0 for j in range(ncols)] for i in range(nrows)]
@@ -29,72 +35,157 @@ class Matrix():
     def set(self, i, j, v):
         self.buffer[i-1][j-1]=v
 
-
-
     def get(self, i, j):
         return self.buffer[i-1][j-1]
-
-
 
     def add(self,matrixb):
         assert matrixb.nrows==self.nrows
         assert matrixb.ncols==self.ncols
-        new_list=Matrix(self.nrows,self.ncols)
+        result  = Matrix(self.nrows,self.ncols)
         for i in range(1, self.nrows+1):
             for j in range(1, self.ncols+1):
-                new_list.set(i,j, self.get(i, j)+matrixb.get(i,j))
+                result.set(i, j, self.get(i, j)+matrixb.get(i, j))
+        return result
 
 
-
-    def scalar_mul(self,scalar):
-        new_list=Matrix(self.nrows,self.ncols)
-        for i in range(1,self.nrows+1):
-            for j in range(1,self.ncols+1):
-                new_list.set(i,j,self.get(i,j)*scalar)
+    def scalar_mul(self, scalar):
+        result=Matrix(self.nrows, self.ncols)
+        for i in range(1, self.nrows+1):
+            for j in range(1, self.ncols+1):
+                result.set(i, j, scalar*self.get(i,j))
+        return result
 
     def mul(self, matrixb):
         assert self.ncols==matrixb.nrows
-        rv=Matrix(self.nrows, matrixb.ncols)
+        result=Matrix(self.nrows, matrixb.ncols)
         for i in range(1, self.nrows+1):
             for j in range(1, matrixb.ncols+1):
                 v_ij = sum([self.get(i,k)*matrixb.get(k,j) for k in range(1, self.ncols+1)])
-                rv.set(i, j, v_ij)
-        return rv
+                result.set(i, j, v_ij)
+        return result
+
+    # useful, low-level methods for Gauss elimination
+
+    def get_row(self, i):
+        return self.buffer[i-1]
+
+    def set_row(self, i, row):
+        self.get_row(i) = row
 
 
-    def gaus_elim_algorithm(self):
-        pass
+    def clone(self):
+        result = Matrix(self.nrows, self.ncols)
+        for i in range(1, self.nrows+1):
+            for j in range(1, self.ncols+1):
+                result.set(i, j, self.get(i, j))
+        return result
+
+    def swap_rows(self, i, j)
+        result = self.clone()
+        result.set_row(i, self.get_row(j))
+        result.set_row(j, self.get_row(i))
+        return result
 
 
-    def reduced_matrix(self,i,j):
-        self.buffer.pop(i-1)
-        for row in range(self.nrows):
-            self.buffer[row].pop(j-1)
 
-    def find_determinant(self):
-        if self.nrows==2 and self.ncols==2:
-            rv=self.get(1,1)*self.get(2,2)-self.get(1,2)*self.get(2,1)
-        else:
-            rv=0
-            i=random.randint(1,self.nrows+1)
-            for j in range(1,self.ncols+1):
-                rv+=self.get(i,j)*find_determinant(self.reduced_matrix,i,j)
-        return rv
+    def mul_row_by_scalar(self, i, scalar):
+        result = self.clone()
+        result.set_row(i, mul_list(scalar, self.get_row(i)))
+        return result
 
-
-    def swap_rows(self,row1,row2):
-        row_to_swap=self.buffer[row1-1]
-        self.buffer[row1-1]=self.buffer[row2-1]
-        self.buffer[row2-1]=row_to_swap
+    # row_i becomes row_i + scalar*row_j
+    def add_rows(self, i, scalar, j):
+        result=self.clone()
+        newRowI = add_lists(result.get_row(i)
+                            , mul_list(result.get_row(j)
+                                       , scalar))
+        result.setRow(i, newRowI)
+        return result
 
 
-    def multiply_row_by_scalar(self,row,scalar):
-        for index in range(len(self.buffer[row-1])):
-            self.set(row,index,self.get(row,index)*scalar)
+    def col_contains_non_zero_value(self, j):
+        for i in range(1, self.nrows+1):
+            if self.get(i, j)!=0:
+                return True
+        return False
 
-    def add_rows(self,row1,row2,scalar):
-        for index in range(1,self.ncols+1):
-            self.set(row1,index,self.get(row1,index)+self.get(row2,index)*scalar)
+    def row_is_all_zeros(self, i):
+        return not self.row_is_not_all_zeros(i)
+
+    def row_is_not_all_zeros(self, i):
+        for j in range(1, self.ncols+1):
+            if self.get(i, j)!=0:
+                return True
+        return False
+
+    # returns True if all rows containing at least one non-zero
+    # value appear before rows containing all zero values
+    def non_zero_rows_are_before_zero_rows(self):
+        encountered_all_zero_row = False
+        for i in range(1, self.nrows+1):
+            if self.row_is_all_zeros(i):
+                encountered_all_zero_row = True
+            else: # not all zeros row
+                if encountered_all_zero_row:
+                    return False
+        return True
+
+    def condition_1_holds(self):
+        return non_zero_rows_are_before_zero_rows(self)
+
+    def find_indx_of_leftmost_non_zero_value(self, i):
+        for j in range(1, self.ncols+1):
+            if self.get(i, j)!=0:
+                return j
+        return 0
+
+    def find_indx_of_leftmost_1(self,i):
+        for j in range(1,self.ncols+1):
+            if self.get(i,j)==1:
+                return j
+        return 0
+
+    # Condition 2 is:
+    #     The left-most non-zero element on each non-zero row
+    #     has the value of 1 and is to the right of the corresponding
+    #     1 of the previous row
+    def condition_2_holds(self):
+        # nzv: non-zero-value
+        idx_of_previous_leftmost_nzv = 0
+        for i in range(1, self.nrows+1):
+            idx_of_current_leftmost_nzv = self.find_indx_of_leftmost_non_zero_value(i)
+            assert idx_of_current_leftmost_nzv>=1
+            if self.get(i, idx_of_current_leftmost_nzv)!=1:
+                return False
+            else:
+                if idx_of_previous_leftmost_nzv>=idx_of_current_leftmost_nzv
+                    return False
+            idx_of_previous_leftmost_nzv = idx_of_current_leftmost_nzv
+        return True
+
+    # Condition 3 is:
+    #    The leftmost 1 of each line is the only nzv of the column in which it belongs
+
+    def condition_3_holds(self):
+        for i in range(1, self.nrows+1):
+            indx_of_leftmost1=self.find_indx_of_leftmost_1(i)
+            for remaining_row in range(i+1,self.nrows+1):
+                if self.get(remaining_row,indx_of_leftmost1)==0:
+                    return False
+        return True
+
+    # todo: grok boolean short-circuiting
+    def is_reduced_row_echelon_form(self):
+        return self.condition_1_holds() and self.condition_2_holds() and self.condition_3_holds()
+
+
+
+
+
+
+
+
+
 
 
     def _print(self):
