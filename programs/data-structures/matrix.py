@@ -43,7 +43,7 @@ class Matrix():
         self.ncols = ncols
         self.buffer = [ [0 for j in range(ncols)] for i in range(nrows)]
 
-        
+
     def createNew(rows): # rows is a list of lists
         nrows = len(rows)
         ncols = len(rows[0])
@@ -125,9 +125,10 @@ class Matrix():
     def add_rows(self, i, scalar, j):
         result=self.clone()
         newRowI = add_lists(result.get_row(i)
-                            , mul_list(result.get_row(j)
-                                       , scalar))
-        result.setRow(i, newRowI)
+                            , mul_list(scalar
+                                       , result.get_row(j)))
+
+        result.set_row(i, newRowI)
         return result
 
 
@@ -213,34 +214,65 @@ class Matrix():
 
 
     def is_reduced_row_echelon_form(self):
+        '''
+        print ("evaluating whether matrix is in RREF")
+        self._print()
+        cond1 = self.condition_1_holds()
+        print ("condition 1 is {}".format(cond1))
+        if not cond1:
+            return False
+        else:
+            cond2 = self.condition_2_holds()
+            print ("condition 2 is {}".format(cond2))
+            if not cond2:
+                return False
+            else:
+                cond3 = self.condition_3_holds()
+                print ("condition 3 is {}".format(cond3))
+                return cond3
+        ''' 
         return self.condition_1_holds() and self.condition_2_holds() and self.condition_3_holds()
 
     # todo use the RREF notation consistently everywhere
-    
+
     def gauss_elim(self):
         result = self.clone()
         MAX_STEPS = 10
         nsteps = 0
-        while not self.is_reduced_row_echelon_form() and nsteps<=MAX_STEPS:
+        rowToSwapInto = 1
+        while not result.is_reduced_row_echelon_form() and nsteps<=MAX_STEPS:
+            print ("starting next loop")
+            result._print()
             j = result.find_leftmost_col_that_contains_nzv()
             colj = result.get_col(j)
             idx_of_row_containing_fst_nzv = indx_of_first_nzv(colj)+1
+            print("LM col with NZV = {}, col is {}, value is {}".format(j, colj, idx_of_row_containing_fst_nzv))
             assert idx_of_row_containing_fst_nzv != -1
             if idx_of_row_containing_fst_nzv != 1:
-                print("\nswap row operation {} <-> {}".format(1, idx_of_row_containing_fst_nzv))
-                result = result.swap_rows(1, idx_of_row_containing_fst_nzv)
+                print(Color.BOLD+Color.RED+"\nswap row operation {} <-> {}".format(rowToSwapInto, idx_of_row_containing_fst_nzv)+Color.END)
+                result = result.swap_rows(rowToSwapInto, idx_of_row_containing_fst_nzv)
                 result._print()
-            val = result.get(1, j)
+            val = result.get(rowToSwapInto, j)
             assert val != 0
             if (val != 1):
                 scalar = 1/val
-                print("\nrow scalar mul: {} * row-{}".format(scalar, 1))
-                result = result.mul_row_by_scalar(1, scalar)
+                print(Color.BOLD+Color.RED+"\nrow scalar mul: {} * row-{}".format(scalar, rowToSwapInto)+Color.END)
+                result = result.mul_row_by_scalar(rowToSwapInto, scalar)
                 result._print()
+            # M[1, j] is 1
+            for i in range(rowToSwapInto+1, result.nrows+1):
+                val_i = result.get(i, j)
+                print("M[{}, {}]={}".format(i, j, val_i))
+                if (val_i != 0):
+                    scalar = -val_i
+                    print("\n add row mul by scalar: row-{} <- {}*row-{}".format(i, scalar, rowToSwapInto))
+                    result = result.add_rows(i, scalar, rowToSwapInto)
+                    result._print()
             nsteps += 1
-        print ("the shit is ready")
+            rowToSwapInto += 1
+        print (Color.BOLD+Color.RED+"the shit is ready"+Color.END)
         return result
-            
+
 
 
     def _print(self):
@@ -248,10 +280,13 @@ class Matrix():
             print("{}".format(self.buffer[i]))
 
 
-matrix1 = Matrix.createNew([ [0, 0], [2, 0] ])
+#matrix1 = Matrix.createNew([ [3, 0], [2, 0] ])
+
+matrix1 = Matrix.createNew([ [0, 0, -2, 0, 7],
+                             [2, 4, -10, 6, 12],
+                             [2, 4, -5, 6, -5]])
 
 
 matrix1._print()
 
 matrix1.gauss_elim()
-
