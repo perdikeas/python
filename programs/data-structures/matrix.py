@@ -11,6 +11,19 @@ def add_lists(alist, blist):
     assert len(alist)==len(blist)
     return [alist[i]+blist[i] for i in range(len(alist))]
 
+def indx_of_first_nzv(alist):
+    for i in range(len(alist)):
+        if (alist[i] != 0):
+            return i
+    return -1
+
+def contains_nzv(alist):
+    for v in alist:
+        if (v != 0):
+            return True
+    return False
+
+
 class Color:
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
@@ -146,13 +159,22 @@ class Matrix():
         return True
 
     def condition_1_holds(self):
-        return non_zero_rows_are_before_zero_rows(self)
+        return self.non_zero_rows_are_before_zero_rows()
 
     # finds the index of the first (left-most) NZV
-    # on row i
+    # on row i - or 0 if the row is all zeros
     def find_indx_of_leftmost_non_zero_value(self, i):
         for j in range(1, self.ncols+1):
             if self.get(i, j)!=0:
+                return j
+        return 0
+
+    # returns the j-index of the first column that
+    # contains a non-zero value - or 0 if no such
+    # column exists
+    def find_leftmost_col_that_contains_nzv(self):
+        for j in range(1, self.ncols+1):
+            if contains_nzv(self.get_col(j)):
                 return j
         return 0
 
@@ -165,14 +187,15 @@ class Matrix():
         # nzv: non-zero-value
         idx_of_previous_leftmost_nzv = 0
         for i in range(1, self.nrows+1):
-            idx_of_current_leftmost_nzv = self.find_indx_of_leftmost_non_zero_value(i)
-            assert idx_of_current_leftmost_nzv>=1
-            if self.get(i, idx_of_current_leftmost_nzv)!=1:
-                return False
-            else:
-                if idx_of_previous_leftmost_nzv>=idx_of_current_leftmost_nzv:
+            if self.row_is_not_all_zeros(i):
+                idx_of_current_leftmost_nzv = self.find_indx_of_leftmost_non_zero_value(i)
+                assert idx_of_current_leftmost_nzv != 0
+                if self.get(i, idx_of_current_leftmost_nzv)!=1:
                     return False
-            idx_of_previous_leftmost_nzv = idx_of_current_leftmost_nzv
+                else:
+                    if idx_of_previous_leftmost_nzv>=idx_of_current_leftmost_nzv:
+                        return False
+                idx_of_previous_leftmost_nzv = idx_of_current_leftmost_nzv
         return True
 
     # Condition 3 is:
@@ -180,21 +203,42 @@ class Matrix():
 
     def condition_3_holds(self):
         for i in range(1, self.nrows+1):
-            j_indx_of_leftmost1=self.find_indx_of_leftmost_non_zero_value(i)
-            assert self.get(i, indx_of_leftmost1)==1
-            for i2 in range(1, self.nrows+1):
-                if (self.get(i2, j_indx_of_leftmost1)!=0) and (i2 != i):
-                    return False
+            if self.row_is_not_all_zeros(i):
+                j_indx_of_leftmost1=self.find_indx_of_leftmost_non_zero_value(i)
+                assert self.get(i, j_indx_of_leftmost1)==1
+                for i2 in range(1, self.nrows+1):
+                    if (self.get(i2, j_indx_of_leftmost1)!=0) and (i2 != i):
+                        return False
         return True
 
 
     def is_reduced_row_echelon_form(self):
         return self.condition_1_holds() and self.condition_2_holds() and self.condition_3_holds()
 
+    # todo use the RREF notation consistently everywhere
+    
     def gauss_elim(self):
         result = self.clone()
-        while not self.is_reduced_row_echelon_form():
-            pass # todo...
+        MAX_STEPS = 10
+        nsteps = 0
+        while not self.is_reduced_row_echelon_form() and nsteps<=MAX_STEPS:
+            j = result.find_leftmost_col_that_contains_nzv()
+            colj = result.get_col(j)
+            idx_of_row_containing_fst_nzv = indx_of_first_nzv(colj)+1
+            assert idx_of_row_containing_fst_nzv != -1
+            if idx_of_row_containing_fst_nzv != 1:
+                print("\nswap row operation {} <-> {}".format(1, idx_of_row_containing_fst_nzv))
+                result = result.swap_rows(1, idx_of_row_containing_fst_nzv)
+                result._print()
+            val = result.get(1, j)
+            assert val != 0
+            if (val != 1):
+                scalar = 1/val
+                print("\nrow scalar mul: {} * row-{}".format(scalar, 1))
+                result = result.mul_row_by_scalar(1, scalar)
+                result._print()
+            nsteps += 1
+        print ("the shit is ready")
         return result
             
 
@@ -204,13 +248,10 @@ class Matrix():
             print("{}".format(self.buffer[i]))
 
 
-matrix1 = Matrix.createNew([ [1, 2], [3, 4] ])
+matrix1 = Matrix.createNew([ [0, 0], [2, 0] ])
 
 
 matrix1._print()
 
-
-matrix1.set_row(1, [42, 43])
-matrix1._print()
-
+matrix1.gauss_elim()
 
