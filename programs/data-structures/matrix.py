@@ -247,6 +247,8 @@ class Matrix():
     def do_final_step(self):
         result = self.clone()
         for i in range(result.nrows, 1, -1):
+            if result.row_is_all_zeros(i):
+                continue
             j = indx_of_first_nzv(result.get_row(i))+1
             v = result.get(i, j)
             assert v == 1
@@ -308,18 +310,24 @@ class Matrix():
 
 
 
-    def _print(self):
+    def _print(self, color=Color.YELLOW):
         for i in range(self.nrows):
-            print("{}".format(self.buffer[i]))
+            print("{}{}{}".format(color, self.buffer[i], Color.END))
 
 
 matrix1 = Matrix.createNew([ [0, 0, -2, 0, 7],
                              [2, 4, -10, 6, 12],
                              [2, 4, -5, 6, -5]])
-
-
-
-
-matrix1._print()
-
 matrix1.gauss_elim()
+
+matrix2 = Matrix.createNew([[2, 3, -4], [3, -1, 2], [5, 6, 8]])
+matrix2.gauss_elim()
+
+matrix3 = Matrix.createNew([[1, 2, -2, 1], [3, -3, 1, 0], [2, -8, 3, -2]])
+matrix3.gauss_elim()
+
+matrix4 = Matrix.createNew([[3, 5, -8], [2, 1, -1], [5, 2, 3], [-1, 1, 1]])
+matrix4.gauss_elim()
+
+matrix5 = Matrix.createNew([[0, 1, 2, 2], [1, 1, 2, 3], [2, 2, 2, 3], [2, 3, 3, 3]])
+matrix5.gauss_elim()
