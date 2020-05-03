@@ -271,7 +271,7 @@ class Matrix():
             j = result.find_leftmost_col_that_contains_nzv(rowToSwapInto-1)
             full_col = result.get_col(j)
             truncated_col = full_col[(rowToSwapInto-1):]
-            idx_of_row_containing_fst_nzv = indx_of_first_nzv(full_col)+rowToSwapInto
+            idx_of_row_containing_fst_nzv = indx_of_first_nzv(truncated_col)+rowToSwapInto
             # idx = 1
             print("LM col with NZV = {}, full col is {}, fst row containing NZV is {}".format(j, full_col, idx_of_row_containing_fst_nzv))
 
