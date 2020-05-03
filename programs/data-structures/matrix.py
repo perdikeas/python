@@ -178,7 +178,7 @@ class Matrix():
             # the below works because rowThreshold is indexed according
             # to programmatic conventions here, while it is supplied
             # according to math conventions in the parameter
-            if contains_nzv(self.get_col(j)[(rowThreshold-1):]):
+            if contains_nzv(self.get_col(j)[rowThreshold:]):
                 return j
         return 0
 
@@ -263,13 +263,12 @@ class Matrix():
 
     def gauss_elim(self):
         result = self.clone()
-        MAX_STEPS = 10
-        nsteps = 0
         rowToSwapInto = 1
-        while rowToSwapInto <= result.nrows and nsteps<=MAX_STEPS:
+        while rowToSwapInto <= result.nrows:
             print (Color.CYAN+Color.BOLD+"\nstarting next loop"+Color.END)
             result._print()
-            j = result.find_leftmost_col_that_contains_nzv(rowToSwapInto)
+            # if we are swaping into row <rowToSwapInto> than we ignore rows below that number
+            j = result.find_leftmost_col_that_contains_nzv(rowToSwapInto-1)
             full_col = result.get_col(j)
             truncated_col = full_col[(rowToSwapInto-1):]
             idx_of_row_containing_fst_nzv = indx_of_first_nzv(full_col)+rowToSwapInto
@@ -297,7 +296,6 @@ class Matrix():
                     print("\n add row mul by scalar: row-{} <- {}*row-{}".format(i, scalar, rowToSwapInto))
                     result = result.add_rows(i, scalar, rowToSwapInto)
                     result._print()
-                    nsteps += 1
             if result.linesAfterAreAllZero(rowToSwapInto):
                 break
             else:
