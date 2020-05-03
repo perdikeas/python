@@ -238,12 +238,33 @@ class Matrix():
 
     # todo use the RREF notation consistently everywhere
 
+    def linesAfterAreAllZero(self, rowToSwapInto):
+        for i in range(rowToSwapInto+1, self.nrows+1):
+            if self.row_is_not_all_zeros(i):
+                return False
+        return True
+
+    def do_final_step(self):
+        result = self.clone()
+        for i in range(result.nrows, 1, -1):
+            j = indx_of_first_nzv(result.get_row(i))+1
+            v = result.get(i, j)
+            assert v == 1
+            for k in range(i-1, 0, -1):
+                scalar = - result.get(k, j)
+                print("\n add row mul by scalar: row-{} <- {}*row-{}".format(k, scalar, i))
+                result = result.add_rows(k, scalar, i)
+                result._print()
+        return result
+                
+            
+
     def gauss_elim(self):
         result = self.clone()
         MAX_STEPS = 10
         nsteps = 0
         rowToSwapInto = 1
-        while not result.is_reduced_row_echelon_form() and nsteps<=MAX_STEPS:
+        while rowToSwapInto <= result.nrows and nsteps<=MAX_STEPS:
             print (Color.CYAN+Color.BOLD+"\nstarting next loop"+Color.END)
             result._print()
             j = result.find_leftmost_col_that_contains_nzv(rowToSwapInto)
@@ -275,8 +296,14 @@ class Matrix():
                     result = result.add_rows(i, scalar, rowToSwapInto)
                     result._print()
                     nsteps += 1
-            rowToSwapInto += 1
+            if result.linesAfterAreAllZero(rowToSwapInto):
+                break
+            else:
+                rowToSwapInto += 1
+
+        result = result.do_final_step()
         print (Color.BOLD+Color.CYAN+"the shit is ready"+Color.END)
+        assert result.is_reduced_row_echelon_form()
         return result
 
 
