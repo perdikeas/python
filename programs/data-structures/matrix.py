@@ -172,10 +172,13 @@ class Matrix():
 
     # returns the j-index of the first column that
     # contains a non-zero value - or 0 if no such
-    # column exists
-    def find_leftmost_col_that_contains_nzv(self):
+    # column exists. NB: ignore rows that are < rowThreshold
+    def find_leftmost_col_that_contains_nzv(self, rowThreshold):
         for j in range(1, self.ncols+1):
-            if contains_nzv(self.get_col(j)):
+            # the below works because rowThreshold is indexed according
+            # to programmatic conventions here, while it is supplied
+            # according to math conventions in the parameter
+            if contains_nzv(self.get_col(j)[(rowThreshold-1):]):
                 return j
         return 0
 
@@ -230,7 +233,7 @@ class Matrix():
                 cond3 = self.condition_3_holds()
                 print ("condition 3 is {}".format(cond3))
                 return cond3
-        ''' 
+        '''
         return self.condition_1_holds() and self.condition_2_holds() and self.condition_3_holds()
 
     # todo use the RREF notation consistently everywhere
@@ -241,14 +244,17 @@ class Matrix():
         nsteps = 0
         rowToSwapInto = 1
         while not result.is_reduced_row_echelon_form() and nsteps<=MAX_STEPS:
-            print ("starting next loop")
+            print (Color.CYAN+Color.BOLD+"\nstarting next loop"+Color.END)
             result._print()
-            j = result.find_leftmost_col_that_contains_nzv()
-            colj = result.get_col(j)
-            idx_of_row_containing_fst_nzv = indx_of_first_nzv(colj)+1
-            print("LM col with NZV = {}, col is {}, value is {}".format(j, colj, idx_of_row_containing_fst_nzv))
+            j = result.find_leftmost_col_that_contains_nzv(rowToSwapInto)
+            full_col = result.get_col(j)
+            truncated_col = full_col[(rowToSwapInto-1):]
+            idx_of_row_containing_fst_nzv = indx_of_first_nzv(full_col)+rowToSwapInto
+            # idx = 1
+            print("LM col with NZV = {}, full col is {}, fst row containing NZV is {}".format(j, full_col, idx_of_row_containing_fst_nzv))
+
             assert idx_of_row_containing_fst_nzv != -1
-            if idx_of_row_containing_fst_nzv != 1:
+            if idx_of_row_containing_fst_nzv != rowToSwapInto:
                 print(Color.BOLD+Color.RED+"\nswap row operation {} <-> {}".format(rowToSwapInto, idx_of_row_containing_fst_nzv)+Color.END)
                 result = result.swap_rows(rowToSwapInto, idx_of_row_containing_fst_nzv)
                 result._print()
@@ -256,10 +262,10 @@ class Matrix():
             assert val != 0
             if (val != 1):
                 scalar = 1/val
-                print(Color.BOLD+Color.RED+"\nrow scalar mul: {} * row-{}".format(scalar, rowToSwapInto)+Color.END)
+                print(Color.BOLD+Color.RED+"\nrow scalar mul: {} * row {}".format(scalar, rowToSwapInto)+Color.END)
                 result = result.mul_row_by_scalar(rowToSwapInto, scalar)
                 result._print()
-            # M[1, j] is 1
+
             for i in range(rowToSwapInto+1, result.nrows+1):
                 val_i = result.get(i, j)
                 print("M[{}, {}]={}".format(i, j, val_i))
@@ -268,9 +274,9 @@ class Matrix():
                     print("\n add row mul by scalar: row-{} <- {}*row-{}".format(i, scalar, rowToSwapInto))
                     result = result.add_rows(i, scalar, rowToSwapInto)
                     result._print()
-            nsteps += 1
+                    nsteps += 1
             rowToSwapInto += 1
-        print (Color.BOLD+Color.RED+"the shit is ready"+Color.END)
+        print (Color.BOLD+Color.CYAN+"the shit is ready"+Color.END)
         return result
 
 
@@ -280,11 +286,11 @@ class Matrix():
             print("{}".format(self.buffer[i]))
 
 
-#matrix1 = Matrix.createNew([ [3, 0], [2, 0] ])
-
 matrix1 = Matrix.createNew([ [0, 0, -2, 0, 7],
                              [2, 4, -10, 6, 12],
                              [2, 4, -5, 6, -5]])
+
+
 
 
 matrix1._print()
