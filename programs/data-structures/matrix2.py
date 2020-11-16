@@ -1,6 +1,19 @@
 #!/usr/bin/env python3.7
 import math
 
+def contains_nzv(list):
+    for i in list:
+        if i!=0:
+            return True
+    return False
+
+def idx_of_fst_nzv(list):
+    for i in range(len(list)):
+        if list[i]!=0:
+            return i+1
+    return 0
+
+
 class Color:
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
@@ -125,17 +138,43 @@ class Matrix():
                 return False
         return True
 
+    def is_not_row_all_zeros(self,i):
+        for v in self.get_row(i):
+            if v!=0:
+                return True
+        return False
+
     def is_col_all_zeros(self,j):
         for v in self.get_col(j):
             if v!=0:
                 return False
         return True
 
+    def is_not_col_all_zeros(self,j):
+        for v in self.get_col(j):
+            if v!=0:
+                return True
+        return False
+
+    def is_matrix_all_zeros(self):
+        for i in range(1,self.nrows+1):
+            if not self.is_row_all_zeros(i):
+                return False
+        return True
+
+
     def get_idx_of_leftmost_nzv_in_row(self,i):
         for j in range(1,self.ncols+1):
             if self.get(i,j)!=0:
                 return j
         return 0
+
+    def get_idx_of_first_nzv_in_col(self,j):
+        for i in range(1,self.ncols+1):
+            if self.get(i,j)!=0:
+                return i
+        return 0
+
     def non_zero_rows_are_before_zero_rows(self):
         zero_row_encountered=False
         for i in range(1,self.nrows+1):
@@ -158,7 +197,7 @@ class Matrix():
         result.buffer[i2-1]=tmp
         return result
 
-    def add_rows_mul_by_scalar(self,i1,i2,v):
+    def add_row_mul_by_scalar(self,i1,i2,v):
         result=self.clone()
         result.buffer[i1-1]=[result.get(i1,j)+v*result.get(i2,j) for j in range(1,self.ncols+1)]
         return result
@@ -168,9 +207,26 @@ class Matrix():
         result.buffer[i-1]=[v*element for element in result.get_row(i)]
         return result
 
+    def rows_after_are_all_zeros(self,row_threshold):
+        for i in range(row_threshold+1,self.nrows+1):
+            if self.is_not_row_all_zeros(i):
+                return False
+        return True
+
+    def gauss_elim_final_step(self):
+        result=self.clone()
+        for i in range(1,result.nrows+1):
+            idx_of_leftmost_nzv=result.get_idx_of_leftmost_nzv_in_row(i)
+            for _i in range(1,i):
+                v=-1*result.get(i,idx_of_leftmost_nzv)
+                result=result.add_row_mul_by_scalar(i,1,v)
+        return result
+
+
+
     #this is the form in which the matrix is transformed through the gauss elimination algorithm
     #row-echelon-form
-    def is_in_row_echelon_form(self):
+    def is_in_reduced_row_echelon_form(self):
         return self.condition_1_holds() and self.condition_2_holds() and self.condition_3_holds()
 
 
@@ -199,10 +255,47 @@ class Matrix():
                 return False
         return True
 
+
+    def gauss_elim(self):
+        result=self.clone()
+        if result.is_matrix_all_zeros():
+            return result
+
+        while not result.is_in_reduced_row_echelon_form():
+            row_to_swap_into=1
+            for j in range(1,self.ncols+1):
+                colj=result.get_col(j)[row_to_swap_into-1:]
+                if contains_nzv(colj):
+                    idx_of_leftmost_col_that_contains_nzv=j
+                    idx_of_fst_row_that_contains_nzv=idx_of_fst_nzv(colj)+row_to_swap_into-1
+
+                    result=result.swap_rows(idx_of_fst_row_that_contains_nzv,row_to_swap_into)
+                    print(Color.RED+Color.BOLD+'Swapping rows {}<-->{}'.format(idx_of_fst_row_that_contains_nzv,row_to_swap_into))
+                    result._print()
+
+                    scalar=1/self.get(row_to_swap_into,idx_of_leftmost_col_that_contains_nzv)
+                    result=result.mul_row_by_scalar(row_to_swap_into,scalar)
+                    print('row {}--> row{} * {}'.format(row_to_swap_into,row_to_swap_into,scalar))
+                    result._print()
+
+                    for i in range(row_to_swap_into+1,self.nrows+1):
+                        v=-1*self.get(i,idx_of_leftmost_col_that_contains_nzv)
+                        result=result.add_row_mul_by_scalar(i,row_to_swap_into,v)
+                        print('row {} --> row {} + {}* row {}'.format(i,i,v,row_to_swap_into))
+
+                    if result.rows_after_are_all_zeros(row_to_swap_into):
+                        result.gauss_elim_final_step()
+                    else:
+                        row_to_swap_into+=1
+
+            result.gauss_elim_final_step()
+
+        return result
+
+
     def _print(self):
         for element in self.buffer:
             print(element)
 
-matrix1=Matrix.create_new([[1,2,3],[4,5,6],[7,8,9]])
-matrix2=matrix1.add_rows_mul_by_scalar(2,1,-7)
-matrix2._print()
+matrix1=Matrix.create_new([[1,2,3],[-7,9,0],[1,0,0]])
+matrix1.gauss_elim()._print()
