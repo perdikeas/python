@@ -1,17 +1,16 @@
-#By considering the terms in the Fibonacci sequence whose values do not
-#exceed four million
-#find the sum of the even-valued terms.
+#!/usr/bin/env python3.7
 
+x=1
+y=1
+z=0
+result=0
 
-a=1
-b=1
+while z<4*(10**6):
+    z=x+y
+    if z%2==0:
+        result+=z
 
-fib=[]
-fib.extend([a,b])
-for i in range(2,4000000):
-
-    i=fib[i-1]+fib[i-2]
-    i++
-fib.append(i)
-fibeven=filter(lambda x:x%2==0,fib)
-print(sum(fib))
+    x=y
+    y=z
+    
+print(result)
