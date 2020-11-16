@@ -1,4 +1,5 @@
-N=10
+#!/usr/bin/env python3.7
+N=4000000
 
 def prepareFib(N):
     fib = []
