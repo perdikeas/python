@@ -1,0 +1,45 @@
+#exercise 4.10
+fast_food=["pizza","burger","club-sandwhich","chips"]
+#1
+print("The first 3 items in the list are: ")
+print(fast_food[:3])
+
+#2
+print("Three items from the middle of the list are ")
+print(fast_food[1:])
+
+#3
+print("The last three items in the list are ")
+print(fast_food[-3:])
+
+#exercie 4.11
+my_pizzas=["pepperoni","special","bacon","margarita"]
+friends_pizzas=my_pizzas[:]
+
+#1
+my_pizzas.append("4_cheeses")
+
+#2
+friends_pizzas.append("mozarella")
+
+#3
+print("My pizzas are: \n")
+for i in range(5):
+    print(my_pizzas[i])
+
+print("My friend's pizzas are: \n")
+for i in range(5):
+    print(friends_pizzas[i])
+
+#exercise 4.13
+buffet_foods=("pizza","burger","veal","sea_food","chinese_food")
+
+#1
+print("\n The buffet foods are: ")
+for i in range(5):
+    print(buffet_foods[i])
+
+#2 revised menu
+buffet_foods=("club_sandwich","burger","veal","sea_food","pizza")
+print("\nThe revised menu is: ")
+print(buffet_foods)
